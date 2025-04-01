@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="75" height="39" tilewidth="32" tileheight="32" infinite="0" nextlayerid="2" nextobjectid="1">
+ <tileset firstgid="1" name="a" tilewidth="32" tileheight="32" tilecount="36" columns="6">
+  <properties>
+   <property name="collision" type="bool" value="true"/>
+  </properties>
+  <image source="../img/tile.png" width="200" height="200"/>
+  <tile id="15">
+   <properties>
+    <property name="collision" type="bool" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer id="1" name="Tile Layer 1" width="75" height="39">
+  <data encoding="base64" compression="zlib">
+   eJzt2T0OgDAIgNEewKH3P62rDqVEacvP9xImEy2UEBNaA4C3/ogquhCVVMwZ9Zzq8WhzJdJZNaQ5r43ROyP5kqfFN3Zbcd8AAABANfwbw8Ksj+gxvcq1Yh7BAn10Tqbae8/DS629nMMrajOWrXey5bPLJTzLsufxtJ+z2Kmtjj81iNgfAPK7AdKTCj0=
+  </data>
+ </layer>
+</map>
