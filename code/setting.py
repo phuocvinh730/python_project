@@ -3,6 +3,9 @@ import pygame
 from pytmx.util_pygame import load_pygame
 from os.path import join
 from pygame.math import Vector2
+from os import walk
+from os.path import join
+from math import sin,cos,radians
 
 # thong so game
 game_width=1200
@@ -28,3 +31,18 @@ tile_size=64
 player_speed=200
 player_gravity=2000
 player_jump_height=30
+
+# hien thi bo cuc 
+Z={
+    'background':0,
+    'clouds':1,
+    'background_tiles':2,
+    'path':3,
+    'background_details':4,
+    'main':5,
+    'water':6,
+    'fg':7
+}
+
+#setting sprite
+animation_speed=2

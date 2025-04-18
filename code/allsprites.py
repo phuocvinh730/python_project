@@ -9,6 +9,6 @@ class allsprites(pygame.sprite.Group) :
     def draw(self, pos):
         self.offset.x=-(pos[0]-game_width/2)
         self.offset.y=-(pos[1]-game_height/2)
-        for tile in self :
+        for tile in sorted(self,key=lambda sprite:sprite.z) :
             pos=tile.rect.topleft+self.offset
             self.surf.blit(tile.image,pos)
