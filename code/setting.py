@@ -45,4 +45,4 @@ Z={
 }
 
 #setting sprite
-animation_speed=2
+animation_speed=8
