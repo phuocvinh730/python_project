@@ -33,8 +33,8 @@ class player(pygame.sprite.Sprite):
 
         self.attacking = False
         self.enemy_group = None
-        self.destructible_group = None  # Nhóm chướng ngại có thể phá
-
+        self.destructible_group = None 
+        
         self.timers = {
             'wall_jump': Timer(400),
             'wall_slide_block': Timer(250),
@@ -139,12 +139,10 @@ class player(pygame.sprite.Sprite):
             self.hit_enemy()
 
     def hit_enemy(self):
-        # Tấn công kẻ địch
         if self.enemy_group:
             for enemy in self.enemy_group:
                 if self.hit_box_rect.colliderect(enemy.rect):
                     enemy.kill()
-        # Tấn công chướng ngại vật
         if self.destructible_group:
             for obj in self.destructible_group:
                 if self.hit_box_rect.colliderect(obj.rect):
@@ -205,7 +203,7 @@ class player(pygame.sprite.Sprite):
 
         self.attacking = False
         self.enemy_group = None
-        self.destructible_group = None  # Nhóm chướng ngại có thể phá
+        self.destructible_group = None 
 
         self.timers = {
             'wall_jump': Timer(400),
@@ -311,12 +309,10 @@ class player(pygame.sprite.Sprite):
             self.hit_enemy()
 
     def hit_enemy(self):
-        # Tấn công kẻ địch
         if self.enemy_group:
             for enemy in self.enemy_group:
                 if self.hit_box_rect.colliderect(enemy.rect):
                     enemy.kill()
-        # Tấn công chướng ngại vật
         if self.destructible_group:
             for obj in self.destructible_group:
                 if self.hit_box_rect.colliderect(obj.rect):
