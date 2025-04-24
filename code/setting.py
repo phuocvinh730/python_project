@@ -7,12 +7,12 @@ from os import walk
 from os.path import join
 from math import sin,cos,radians
 
-# thong so game
+
 game_width=1200
 game_height=700
 game_title=""
 
-# mau 
+
 color_red=(255, 0, 0)
 color_green=(0, 255, 0)
 color_blue=(0, 0, 255)
@@ -24,15 +24,14 @@ color_black=(0, 0, 0)
 color_white=(255, 255, 255)
 color_gray=(128, 128, 128)
 
-# tile map
 tile_size=64
 
-# setting nhan vat
+
 player_speed=200
 player_gravity=2000
 player_jump_height=30
 
-# hien thi bo cuc 
+
 Z={
     'background':0,
     'clouds':1,
@@ -44,5 +43,5 @@ Z={
     'fg':7
 }
 
-#setting sprite
+
 animation_speed=8
