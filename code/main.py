@@ -43,7 +43,6 @@ class Game:
         }
 
     def load_level(self):
-        # Xoá level cũ trước khi load mới
         if hasattr(self, 'game_level'):
             del self.game_level
         self.game_level = level(self.game_map[0], self.level_frames)
@@ -55,7 +54,7 @@ class Game:
                 if evt.type == pygame.QUIT:
                     self.game_run = False
                 if evt.type == pygame.KEYDOWN and evt.key == pygame.K_r and self.game_level.player.dead:
-                    self.load_level()  # Reset lại level khi thua và nhấn R
+                    self.load_level() 
 
             self.game_level.run(fps)
             pygame.display.update()
