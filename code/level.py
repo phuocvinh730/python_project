@@ -15,7 +15,7 @@ class level:
         self.tooth_tile = pygame.sprite.Group()
         self.bullet_tile = pygame.sprite.Group()
         self.enemy_tile = pygame.sprite.Group()
-        self.destructible_tile = pygame.sprite.Group()  # chướng ngại vật có thể phá
+        self.destructible_tile = pygame.sprite.Group()
 
         self.setup(tmx_map, level_frames)
 
@@ -47,7 +47,7 @@ class level:
                 spike_obj = spike((obj.x + obj.width / 2, obj.y + obj.height / 2), level_frames['spike'],
                                   (self.all_tile, self.damage_tile), obj.properties['radius'], obj.properties['speed'],
                                   obj.properties['start_angle'], obj.properties['end_angle'])
-                self.destructible_tile.add(spike_obj)  # thêm vào group phá được
+                self.destructible_tile.add(spike_obj)
 
                 for i in range(0, obj.properties['radius'], 20):
                     spike((obj.x + obj.width / 2, obj.y + obj.height / 2), level_frames['spike_chain'],
@@ -91,7 +91,7 @@ class level:
                       (self.all_tile, self.collision_tile, self.enemy_tile),
                       obj.properties['reverse'], self.player)
 
-        # Gán nhóm cho player
+        
         self.player.enemy_group = self.enemy_tile
         self.player.destructible_group = self.destructible_tile
 
