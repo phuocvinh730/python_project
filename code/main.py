@@ -1,7 +1,205 @@
 from setting import *
 from level import *
 from support import *
+import pygame, sys
 
+def show_score_screen(screen):
+    WIDTH, HEIGHT = game_width, game_height
+
+    # Load background
+    background = pygame.image.load("code/bg.jpeg")
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+
+    font = pygame.font.Font(None, 50)
+    small_font = pygame.font.Font(None, 32)
+
+    input_rect = pygame.Rect(400, 250, 200, 50)
+    back_button = pygame.Rect(280, 350, 120, 50)      # Bên trái
+    submit_button = pygame.Rect(580, 350, 120, 50)    # Bên phải
+
+    color_inactive = pygame.Color('lightskyblue3')
+    color_active = pygame.Color('dodgerblue2')
+
+    active = False
+    text = ''
+    submitted = False
+    group_score = 0
+
+    running = True
+    valid = False
+
+    while running:
+        mouse_pos = pygame.mouse.get_pos()
+        screen.blit(background, (0, 0))
+
+        # Tiêu đề
+        title = font.render("GROUP SCORE", True, (255, 255, 255))
+        screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 100))
+
+        # Sự kiện
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if input_rect.collidepoint(mouse_pos):
+                    active = True
+                else:
+                    active = False
+
+                if submit_button.collidepoint(mouse_pos) and text.strip() != '':
+                    try:
+                        group_score = int(text)
+                        if 1 <= group_score <= 10:
+                            submitted = True
+                            valid = True
+                        else:
+                            submitted = True
+                            valid = False
+                    except ValueError:
+                        submitted = True
+                        valid = False
+
+                if back_button.collidepoint(mouse_pos):
+                    running = False
+
+            elif event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_BACKSPACE:
+                        text = text[:-1]
+                    elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                        pass
+                    else:
+                        if len(text) < 5 and event.unicode.isdigit():
+                            text += event.unicode
+
+        # Vẽ input box
+        # Vẽ input box với nền trắng + bo góc
+        pygame.draw.rect(screen, (255, 255, 255), input_rect, border_radius=10)  # nền trắng
+        border_color = color_active if active else color_inactive
+        pygame.draw.rect(screen, border_color, input_rect, 2, border_radius=10)  # viền
+
+        # Text màu hồng trong input
+        txt_surface = small_font.render(text, True, (255, 100, 180))
+        screen.blit(txt_surface, (input_rect.x + 10, input_rect.y + 10))
+
+
+        label = small_font.render("Enter group score:", True, (255, 100, 180))
+        screen.blit(label, (input_rect.x - 250, input_rect.y + 10))
+
+        # Nút BACK (màu hồng)
+        pygame.draw.rect(screen, (255, 100, 180), back_button, border_radius=10)
+        back_label = small_font.render("BACK", True, (255, 255, 255))
+        screen.blit(back_label, (back_button.centerx - back_label.get_width()//2,
+                                 back_button.centery - back_label.get_height()//2))
+
+        # Nút SUBMIT (màu xanh)
+        pygame.draw.rect(screen, (0, 200, 0), submit_button, border_radius=10)
+        submit_label = small_font.render("SUBMIT", True, (255, 255, 255))
+        screen.blit(submit_label, (submit_button.centerx - submit_label.get_width()//2,
+                                   submit_button.centery - submit_label.get_height()//2))
+
+        # Nếu đã submit thì hiện kết quả
+        if submitted:
+            if valid:
+                result = font.render(f"GROUP SCORE: {group_score} pts", True, (255, 255, 0))
+            else:
+                result = small_font.render("Invalid score. Please enter a number between 1 and 10.", True, (255, 50, 50))
+            screen.blit(result, (WIDTH // 2 - result.get_width() // 2, 430))
+
+
+        pygame.display.flip()
+
+def show_intro_menu():
+    WIDTH, HEIGHT = game_width, game_height
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("")
+
+    # Màu sắc
+    ORANGE = (255, 140, 0)
+    BLUE = (30, 144, 255)
+    WHITE = (255, 255, 255)
+    LIGHT_BLUE = (135, 206, 250)
+    PINK = (255, 100, 180)
+
+    # Font
+    title_font = pygame.font.SysFont("Arial", 52)
+    name_font = pygame.font.SysFont("Arial", 28)
+    button_font = pygame.font.SysFont("Arial", 28)
+
+    # Load background
+    background = pygame.image.load("code/bg.jpeg")
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+
+    # Load avatar
+    def load_and_scale_avatar(path):
+        img = pygame.image.load(path).convert_alpha()
+        img = pygame.transform.scale(img, (140, 160))
+        mask = pygame.Surface((140, 160), pygame.SRCALPHA)
+        pygame.draw.rect(mask, (255, 255, 255, 255), (0, 0, 140, 160), border_radius=30)
+        img.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+        return img
+
+    avatars = {
+        "Khang": load_and_scale_avatar("code/khang.png"),
+        "Đăng": load_and_scale_avatar("code/dang.png"),
+        "Vinh": load_and_scale_avatar("code/vinh.png"),
+        "Nhi": load_and_scale_avatar("code/nhi.png")
+    }
+
+    # Vẽ nút
+    def draw_button(text, x, y, w, h, color, hover_color, mouse_pos):
+        if x < mouse_pos[0] < x + w and y < mouse_pos[1] < y + h:
+            pygame.draw.rect(screen, hover_color, (x, y, w, h), border_radius=12)
+        else:
+            pygame.draw.rect(screen, color, (x, y, w, h), border_radius=12)
+        label = button_font.render(text, True, WHITE)
+        screen.blit(label, (x + w//2 - label.get_width()//2, y + h//2 - label.get_height()//2))
+
+    # Vòng lặp menu
+    while True:
+        mouse_pos = pygame.mouse.get_pos()
+        screen.blit(background, (0, 0))
+
+        # Tiêu đề
+        title = title_font.render("MEET THE TEAM", True, WHITE)
+        screen.blit(title, (WIDTH//2 - title.get_width()//2, 30))
+
+        # Hiển thị avatar và tên
+        names = list(avatars.keys())
+        for i, name in enumerate(names):
+            x = 100 + i * 220
+            y = 120
+            screen.blit(avatars[name], (x, y))
+            pygame.draw.rect(screen, LIGHT_BLUE, (x, y + 170, 140, 40), border_radius=15)
+            label = name_font.render(name.upper(), True, PINK)
+            screen.blit(label, (x + 70 - label.get_width()//2, y + 190 - label.get_height()//2))
+
+        # Các nút
+        draw_button("SCORES", 250, 500, 120, 50, ORANGE, BLUE, mouse_pos)
+        draw_button("START", 400, 500, 120, 50, ORANGE, BLUE, mouse_pos)
+        draw_button("QUIT", 550, 500, 120, 50, ORANGE, BLUE, mouse_pos)
+
+        # Sự kiện
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if 400 < mouse_pos[0] < 520 and 500 < mouse_pos[1] < 550:
+                    return  # Bắt đầu game
+                elif 550 < mouse_pos[0] < 670 and 500 < mouse_pos[1] < 550:
+                    pygame.quit()
+                    sys.exit()
+                elif 250 < mouse_pos[0] < 370 and 500 < mouse_pos[1] < 550:
+                    show_score_screen(screen)
+
+
+        pygame.display.flip()
+
+
+# ========== GAME CLASS ==========
 class Game:
     def __init__(self):
         pygame.init()
@@ -54,11 +252,14 @@ class Game:
                 if evt.type == pygame.QUIT:
                     self.game_run = False
                 if evt.type == pygame.KEYDOWN and evt.key == pygame.K_r and self.game_level.player.dead:
-                    self.load_level() 
+                    self.load_level()
 
             self.game_level.run(fps)
             pygame.display.update()
 
+# ========== CHẠY CHƯƠNG TRÌNH ==========
 if __name__ == '__main__':
+    pygame.init()
+    show_intro_menu()  # hiển thị menu đầu tiên
     game = Game()
     game.run()

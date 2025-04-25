@@ -34,6 +34,7 @@ class level:
         for obj in tmx_map.get_layer_by_name("Objects"):
             if obj.name == 'player':
                 self.player = player((obj.x, obj.y), self.all_tile, self.collision_tile, self.semi_collision_tile, level_frames['player'])
+
             else:
                 if obj.name in ['barrel', 'crate']:
                     sprite((obj.x, obj.y), obj.image, (self.all_tile, self.collision_tile))
@@ -94,6 +95,7 @@ class level:
         
         self.player.enemy_group = self.enemy_tile
         self.player.destructible_group = self.destructible_tile
+
 
     def run(self, fps):
         self.level_display.fill(color_blue)
