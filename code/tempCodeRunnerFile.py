@@ -1,8 +1,6 @@
-        # Vẽ input box với nền trắng + bo góc
-        pygame.draw.rect(screen, (255, 255, 255), input_rect, border_radius=10)  # nền trắng
-        border_color = color_active if active else color_inactive
-        pygame.draw.rect(screen, border_color, input_rect, 2, border_radius=10)  # viền
-
-        # Text màu hồng trong input
-        txt_surface = small_font.render(text, True, (255, 100, 180))
-        screen.blit(txt_surface, (input_rect.x + 10, input_rect.y + 10))
+        # SUBMIT với style bo góc, nền trắng, viền xanh
+        pygame.draw.rect(screen, (255, 255, 255), submit_button, border_radius=12)  # nền trắng
+        pygame.draw.rect(screen, (0, 200, 0), submit_button, 4, border_radius=12)  # viền xanh
+        submit_label = small_font.render("SUBMIT", True, (0, 200, 0))
+        screen.blit(submit_label, (submit_button.centerx - submit_label.get_width()//2,
+                                submit_button.centery - submit_label.get_height()//2))
