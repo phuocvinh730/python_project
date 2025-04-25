@@ -114,12 +114,59 @@ def show_score_screen(screen):
             screen.blit(result, (WIDTH // 2 - result.get_width() // 2, top_y + 160))
 
         pygame.display.flip()
+def ask_player_name(screen):
+    WIDTH, HEIGHT = game_width, game_height
+    background = pygame.image.load("code/bg.jpeg")
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+
+    font = pygame.font.SysFont("Arial", 36)
+    input_box = pygame.Rect(WIDTH//2 - 150, HEIGHT//2 - 25, 300, 50)
+    color_inactive = pygame.Color('lightskyblue3')
+    color_active = pygame.Color('dodgerblue2')
+    active = False
+    name = ''
+
+    running = True
+    while running:
+        mouse_pos = pygame.mouse.get_pos()
+        screen.blit(background, (0, 0))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                active = input_box.collidepoint(mouse_pos)
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_RETURN:
+                        if name.strip() != '':
+                            return name  # Trả về tên nhập
+                    elif event.key == pygame.K_BACKSPACE:
+                        name = name[:-1]
+                    else:
+                        if len(name) < 15:  # giới hạn độ dài
+                            name += event.unicode
+
+        # Vẽ input
+        color = color_active if active else color_inactive
+        pygame.draw.rect(screen, (255, 255, 255), input_box, border_radius=8)
+        pygame.draw.rect(screen, color, input_box, 2, border_radius=8)
+
+        text_surface = font.render(name, True, (0, 0, 0))
+        screen.blit(text_surface, (input_box.x + 10, input_box.y + 5))
+
+        # Gợi ý nhập
+        hint = font.render("Enter your name:", True, (255, 255, 255))
+        screen.blit(hint, (WIDTH//2 - hint.get_width()//2, HEIGHT//2 - 100))
+
+        pygame.display.flip()
 
 def show_intro_menu():
     WIDTH, HEIGHT = game_width, game_height
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("")
-
+    player_name=""
     # Màu sắc
     ORANGE = (255, 140, 0)
     BLUE = (30, 144, 255)
@@ -192,7 +239,8 @@ def show_intro_menu():
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if 400 < mouse_pos[0] < 520 and 500 < mouse_pos[1] < 550:
-                    return  # Bắt đầu game
+                    player_name = ask_player_name(screen)  # 🌟 Gọi nhập tên
+                    return player_name  # trả tên về cho game
                 elif 550 < mouse_pos[0] < 670 and 500 < mouse_pos[1] < 550:
                     pygame.quit()
                     sys.exit()
@@ -205,9 +253,10 @@ def show_intro_menu():
 
 # ========== GAME CLASS ==========
 class Game:
-    def __init__(self):
+    def __init__(self,player_name):
         pygame.init()
         pygame.display.set_caption(game_title)
+        self.player_name = player_name
         self.game_display = pygame.display.set_mode((game_width, game_height))
         self.import_assets()
         try:
@@ -253,7 +302,7 @@ class Game:
     def load_level(self):
         if hasattr(self, 'game_level'):
             del self.game_level
-        self.game_level = level(self.game_map[0], self.level_frames)
+        self.game_level = level(self.game_map[0], self.level_frames,self.player_name)
 
     def run(self):
         while self.game_run:
@@ -265,11 +314,15 @@ class Game:
                     self.load_level()  # Reset lại level khi thua và nhấn R
 
             self.game_level.run(fps)
+            if self.game_level.player.quit_to_intro:
+                show_intro_menu()           # ← quay lại intro
+                self.load_level()           # ← load lại level từ đầu
+
             pygame.display.update()
 
 # ========== CHẠY CHƯƠNG TRÌNH ==========
 if __name__ == '__main__':
     pygame.init()
-    show_intro_menu()  # hiển thị menu đầu tiên
-    game = Game()
+    player_name = show_intro_menu()  # 🌟 lấy tên
+    game = Game(player_name)
     game.run()

@@ -5,8 +5,10 @@ from allsprites import *
 from enemies import *
 
 class level:
-    def __init__(self, tmx_map, level_frames):
+    def __init__(self, tmx_map, level_frames,player_name):
         self.level_display = pygame.display.get_surface()
+        self.player_name = player_name
+
         self.level_frames = level_frames
         
         self.bg_surface = pygame.transform.scale(
@@ -21,8 +23,8 @@ class level:
         self.bullet_tile = pygame.sprite.Group()
         self.enemy_tile = pygame.sprite.Group()
         self.destructible_tile = pygame.sprite.Group()
-
         self.setup(tmx_map, level_frames)
+        self.enemy_group = self.enemy_tile 
 
     def setup(self, tmx_map, level_frames):
         for layer_name in ['BG', 'FG', "Terrain", 'Platforms']:
@@ -48,7 +50,8 @@ class level:
                     self.all_tile,
                     self.collision_tile,
                     self.semi_collision_tile,
-                    level_frames['player']
+                    level_frames['player'],
+                    self.player_name
                 )
             else:
                 if obj.name in ['barrel', 'crate']:
@@ -113,36 +116,44 @@ class level:
 
     def run(self, fps):
         self.level_display.blit(self.bg_surface, (0, 0))
+
         if not self.player.dead:
             self.all_tile.update(fps)
+            self.player.bullet_group.update(fps)
         else:
             self.player.update(fps)
 
+        # --- Tính offset camera ---
+        offset_x = -self.player.hit_box_rect.x + game_width // 2
+        offset_y = -self.player.hit_box_rect.y + game_height // 2
+
+        # --- Vẽ tile ---
         self.all_tile.draw(self.player.hit_box_rect)
 
+        # --- Vẽ bullet ---
+        for bullet in self.player.bullet_group:
+            bullet_rect = bullet.rect.move(offset_x, offset_y)
+            self.level_display.blit(bullet.image, bullet_rect)
+
+        # --- Vẽ tên player trên đầu ---
+        self.player.draw_name(offset_x, offset_y)
+
+        # --- Kiểm tra bullet trúng enemy ---
+        for bullet in self.player.bullet_group.copy():
+            hits = pygame.sprite.spritecollide(bullet, self.enemy_group, True)
+            if hits:
+                bullet.kill()
+
+        # --- Update player ---
+        self.player.update(fps)
+
+        # --- Kiểm tra player chết bởi tile nguy hiểm ---
         if not self.player.dead:
-            if pygame.sprite.spritecollide(
-                self.player, self.damage_tile, False, pygame.sprite.collide_rect_ratio(0.7)
-            ):
+            if pygame.sprite.spritecollide(self.player, self.damage_tile, False, pygame.sprite.collide_rect_ratio(0.7)):
                 self.player.dead = True
 
-        if not self.player.dead:
-            for b in self.bullet_tile:
-                if b.rect.colliderect(self.player.hit_box_rect):
-                    self.player.dead = True
-                # Nếu player đã chết → hiển thị thông báo
-        if self.player.dead:
-            box_width, box_height = 500, 100
-            box_rect = pygame.Rect(
-                (game_width - box_width) // 2,
-                (game_height - box_height) // 2,
-                box_width,
-                box_height
-            )
-            pygame.draw.rect(self.level_display, (255, 255, 255), box_rect, border_radius=15)  # nền trắng
-            pygame.draw.rect(self.level_display, (0, 200, 0), box_rect, 4, border_radius=15)    # viền xanh
+        # --- Vẽ điểm số ---
+        score_font = pygame.font.SysFont('Arial', 48)
+        score_surface = score_font.render(f"Score: {self.player.score}", True, (255, 255, 255))
+        self.level_display.blit(score_surface, (20, 20))
 
-            font = pygame.font.SysFont('arial', 36)
-            text_surf = font.render('Game Over! Press R to restart.', True, (0, 128, 0))  # chữ xanh lá
-            text_rect = text_surf.get_rect(center=box_rect.center)
-            self.level_display.blit(text_surf, text_rect)

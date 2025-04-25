@@ -2,10 +2,15 @@ import pygame
 from pygame.math import Vector2
 from setting import *
 from timer import Timer
+from bullet import Bullet
 
 class player(pygame.sprite.Sprite):
-    def __init__(self, pos, group, collision_tile, semi_collision_tile, frames):
+    def __init__(self, pos, group, collision_tile, semi_collision_tile, frames,name="Player"):
         super().__init__(group)
+        self.name=name
+        self.bullet_group = pygame.sprite.Group()
+        self.shoot_cooldown = Timer(300)  # bắn mỗi 300ms
+        self.quit_to_intro = False
         self.frames = frames
         self.frames_index = 0
         self.state = 'idle'
@@ -41,10 +46,16 @@ class player(pygame.sprite.Sprite):
             'platform_skip': Timer(200),
             'attack': Timer(500)
         }
+        self.score = 0
 
     def input(self):
         keys = pygame.key.get_pressed()
         self.direction.x = 0
+
+        if keys[pygame.K_ESCAPE]:
+            self.dead=False
+            self.quit_to_intro = True  # ← THÊM DÒNG NÀY
+
         if not self.timers["wall_jump"].active:
             if keys[pygame.K_LEFT]:
                 self.direction.x -= 1
@@ -63,6 +74,23 @@ class player(pygame.sprite.Sprite):
                 self.jump_pressed = True
         else:
             self.jump_pressed = False
+        if keys[pygame.K_x] and not self.shoot_cooldown.active:
+            self.shoot()
+
+    def shoot(self):
+        direction = 1 if self.facing_right else -1
+        offset_x = 60 * direction
+        spawn_pos = (self.rect.centerx + offset_x, self.rect.centery + 10)
+        bullet = Bullet(spawn_pos, direction, self)
+        self.bullet_group.add(bullet)
+        self.shoot_cooldown.activate()
+
+
+
+
+
+
+
 
     def move(self, fps):
         self.hit_box_rect.x += self.direction.x * self.speed * fps
@@ -107,6 +135,7 @@ class player(pygame.sprite.Sprite):
         if self.platform:
             self.hit_box_rect.topleft += self.platform.direction * self.platform.speed * fps
 
+
     def semi_collision(self):
         if not self.timers['platform_skip'].active:
             for tile in self.semi_collition_tile:
@@ -138,34 +167,12 @@ class player(pygame.sprite.Sprite):
             self.timers['attack'].activate()
             self.hit_enemy()
 
-    def hit_enemy(self):
-        try:
-            if self.enemy_group is not None:
-                # Vùng tấn công phía trước
-                if self.facing_right:
-                    attack_rect = pygame.Rect(self.hit_box_rect.right, self.hit_box_rect.top, 60, self.hit_box_rect.height)
-                else:
-                    attack_rect = pygame.Rect(self.hit_box_rect.left - 60, self.hit_box_rect.top, 60, self.hit_box_rect.height)
-
-                # DEBUG: Vẽ vùng chém ra màn hình để test
-                pygame.draw.rect(self.display, (255, 0, 0), attack_rect, 2)
-
-                for enemy in self.enemy_group.copy():  # Sử dụng copy() để tránh lỗi khi xóa
-                    if attack_rect.colliderect(enemy.rect):
-                        print("Enemy hit!")
-                        enemy.kill()
-
-            if self.destructible_group is not None:
-                for obj in self.destructible_group.copy():
-                    if self.hit_box_rect.colliderect(obj.rect):
-                        obj.kill()
-
-        except Exception as e:
-            print("LỖI trong hit_enemy:", e)
 
 
 
-    def update(self, fps):
+
+
+    def update(self, fps, offset_x=0, offset_y=0):
         self.old_rect = self.hit_box_rect.copy()
         self.update_timer()
         self.input()
@@ -181,21 +188,72 @@ class player(pygame.sprite.Sprite):
             self.dead = True
 
         if self.dead:
-            # Vẽ div nền trắng bo góc ở giữa
-            box_width, box_height = 500, 100
+            # Vẽ bảng "Game Over"
+            box_width, box_height = 700, 100  # tăng chiều rộng để chứa chữ dài
             box_rect = pygame.Rect(
-                (game_width - box_width) // 2,
-                (game_height - box_height) // 2,
+                (game_width - box_width) // 1.25,
+                (game_height - box_height) // 1.25,
                 box_width,
                 box_height
             )
-            pygame.draw.rect(self.display, (255, 255, 255), box_rect, border_radius=15)  # nền trắng
-            pygame.draw.rect(self.display, (0, 200, 0), box_rect, 4, border_radius=15)    # viền xanh lá
+            pygame.draw.rect(self.display, (255, 255, 255), box_rect, border_radius=15)
+            pygame.draw.rect(self.display, (0, 200, 0), box_rect, 4, border_radius=15)
 
-            # Hiển thị chữ màu xanh
-            font = pygame.font.SysFont('arial', 36)
-            message = 'Game Over! Press R to restart.'
-            text_surf = font.render(message, True, (0, 128, 0))  # chữ xanh lá
+            font = pygame.font.SysFont('Arial', 30)
+
+            message = f"Game Over! {self.name} get {self.score} scores. Press R to restart.Press ESC to return to menu"
+            text_surf = font.render(message, True, (0, 128, 0))
             text_rect = text_surf.get_rect(center=box_rect.center)
             self.display.blit(text_surf, text_rect)
+
+
+
+
+
+
+
+
+
+    def hit_enemy(self):
+        if self.enemy_group is not None:
+            if self.facing_right:
+                # Nếu player đang quay phải
+                attack_rect = pygame.Rect(
+                    self.hit_box_rect.right, 
+                    self.hit_box_rect.top, 
+                    60, 
+                    self.hit_box_rect.height
+                )
+            else:
+                # Nếu player quay trái
+                attack_rect = pygame.Rect(
+                    self.hit_box_rect.left - 60, 
+                    self.hit_box_rect.top, 
+                    60, 
+                    self.hit_box_rect.height
+                )
+
+            # (DEBUG) Vẽ vùng tấn công ra màn hình để test
+            pygame.draw.rect(self.display, (255, 0, 0), attack_rect, 2)
+
+            for enemy in self.enemy_group.copy():
+                if attack_rect.colliderect(enemy.rect):
+                    enemy.kill()       # Diệt enemy
+                    self.score += 30   # +30 điểm khi chém enemy
+
+
+    def draw_name(self, offset_x, offset_y):
+        if not hasattr(self, 'name') or not self.name:
+            return
+
+        name_font = pygame.font.SysFont('Arial', 24)
+        name_surface = name_font.render(self.name, True, (255, 255, 255))  # chữ trắng
+        name_bg_rect = name_surface.get_rect(midbottom=(
+            self.hit_box_rect.centerx + offset_x,
+            self.hit_box_rect.top + offset_y - 10
+        ))
+
+        pygame.draw.rect(self.display, (135, 206, 250), name_bg_rect.inflate(20, 10), border_radius=8)  # nền xanh
+        pygame.draw.rect(self.display, (0, 150, 255), name_bg_rect.inflate(20, 10), 2, border_radius=8)  # viền xanh đậm
+        self.display.blit(name_surface, name_bg_rect)
 
