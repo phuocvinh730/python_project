@@ -33,8 +33,8 @@ class player(pygame.sprite.Sprite):
 
         self.attacking = False
         self.enemy_group = None
-        self.destructible_group = None 
-        
+        self.destructible_group = None  # Nhóm chướng ngại có thể phá
+
         self.timers = {
             'wall_jump': Timer(400),
             'wall_slide_block': Timer(250),
@@ -181,7 +181,21 @@ class player(pygame.sprite.Sprite):
             self.dead = True
 
         if self.dead:
-            font = pygame.font.SysFont('arial', 40)
-            text_surf = font.render('Ban da thua! Nhan R de choi lai', True, (255, 0, 0))
-            text_rect = text_surf.get_rect(center=(game_width // 2, game_height // 2))
+            # Vẽ div nền trắng bo góc ở giữa
+            box_width, box_height = 500, 100
+            box_rect = pygame.Rect(
+                (game_width - box_width) // 2,
+                (game_height - box_height) // 2,
+                box_width,
+                box_height
+            )
+            pygame.draw.rect(self.display, (255, 255, 255), box_rect, border_radius=15)  # nền trắng
+            pygame.draw.rect(self.display, (0, 200, 0), box_rect, 4, border_radius=15)    # viền xanh lá
+
+            # Hiển thị chữ màu xanh
+            font = pygame.font.SysFont('arial', 36)
+            message = 'Game Over! Press R to restart.'
+            text_surf = font.render(message, True, (0, 128, 0))  # chữ xanh lá
+            text_rect = text_surf.get_rect(center=box_rect.center)
             self.display.blit(text_surf, text_rect)
+
