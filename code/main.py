@@ -60,7 +60,7 @@ class Game:
                 if evt.type == pygame.QUIT:
                     self.game_run = False
                 if evt.type == pygame.KEYDOWN and evt.key == pygame.K_r and self.game_level.player.dead:
-                    self.load_level()
+                    self.load_level()  # Reset lại level khi thua và nhấn R
 
             self.game_level.run(fps)
             pygame.display.update()
