@@ -8,8 +8,13 @@ class Game:
         pygame.display.set_caption(game_title)
         self.game_display = pygame.display.set_mode((game_width, game_height))
         self.import_assets()
-        self.game_map = {0: load_pygame(join('data', 'levels', 'omni.tmx'))}
-        self.load_level()
+        try:
+            self.game_map = {0: load_pygame(join('data', 'levels', 'omni.tmx'))}
+            self.load_level()
+        except FileNotFoundError:
+            print("Lỗi: Không tìm thấy tệp 'data/levels/omni.tmx'. Vui lòng kiểm tra thư mục hoặc cung cấp tệp bản đồ.")
+            pygame.quit()
+            exit()
         self.clock = pygame.time.Clock()
         self.game_run = True
 
@@ -40,10 +45,10 @@ class Game:
             'bg_tiles': import_folder_dict('graphics', 'level', 'bg', 'tiles'),
             'cloud_small': import_folder('graphics', 'level', 'clouds', 'small'),
             'cloud_large': import_image('graphics', 'level', 'clouds', 'large_cloud'),
+            'bg_forest': import_image('graphics', 'backgrounds', 'forest'),
         }
 
     def load_level(self):
-        # Xoá level cũ trước khi load mới
         if hasattr(self, 'game_level'):
             del self.game_level
         self.game_level = level(self.game_map[0], self.level_frames)
@@ -55,7 +60,7 @@ class Game:
                 if evt.type == pygame.QUIT:
                     self.game_run = False
                 if evt.type == pygame.KEYDOWN and evt.key == pygame.K_r and self.game_level.player.dead:
-                    self.load_level()  # Reset lại level khi thua và nhấn R
+                    self.load_level()
 
             self.game_level.run(fps)
             pygame.display.update()
