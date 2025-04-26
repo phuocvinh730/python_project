@@ -143,6 +143,7 @@ class level:
             hits = pygame.sprite.spritecollide(bullet, self.enemy_group, True)
             if hits:
                 bullet.kill()
+                self.player.score += 10 
 
         # --- Update player ---
         self.player.update(fps)
