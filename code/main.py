@@ -1,6 +1,7 @@
 from setting import *
 from level import *
 from support import *
+
 import pygame, sys
 
 def show_score_screen(screen):
