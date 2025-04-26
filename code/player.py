@@ -174,6 +174,7 @@ class player(pygame.sprite.Sprite):
 
     def update(self, fps, offset_x=0, offset_y=0):
         self.old_rect = self.hit_box_rect.copy()
+        self.shoot_cooldown.update()
         self.update_timer()
         self.input()
 
