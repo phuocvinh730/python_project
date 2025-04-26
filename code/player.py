@@ -204,7 +204,7 @@ class player(pygame.sprite.Sprite):
 
             font = pygame.font.SysFont('Arial', 30)
 
-            message = f"Game Over! {self.name} get {self.score} scores. Press R to restart.Press ESC to return to menu"
+            message = f"Game Over! {self.name} get {self.score} scores. Press R to restart"
             text_surf = font.render(message, True, (0, 128, 0))
             text_rect = text_surf.get_rect(center=box_rect.center)
             self.display.blit(text_surf, text_rect)

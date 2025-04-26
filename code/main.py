@@ -115,6 +115,7 @@ def show_score_screen(screen):
             screen.blit(result, (WIDTH // 2 - result.get_width() // 2, top_y + 160))
 
         pygame.display.flip()
+
 def ask_player_name(screen):
     WIDTH, HEIGHT = game_width, game_height
     background = pygame.image.load("code/bg.jpeg")
