@@ -133,6 +133,7 @@ class player(pygame.sprite.Sprite):
     def update_timer(self):
         for timer in self.timers.values():
             timer.update()
+        self.shoot_cooldown.update()
 
     def platform_move(self, fps):
         if self.platform:
